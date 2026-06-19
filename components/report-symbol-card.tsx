@@ -319,10 +319,20 @@ function TechnicalTab({ symbol, currency }: { symbol: SymbolReport; currency: st
 function NewsTab({ symbol }: { symbol: SymbolReport }) {
   const newsItems = buildNewsItems(symbol);
   const sentimentDistribution = buildSentimentDistribution(newsItems);
+  const newsSummary = symbol.newsSummary.summary?.trim();
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="space-y-3 lg:col-span-2">
+        {newsSummary ? (
+          <div className="rounded-lg bg-accent/60 p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <Brain size={13} className="text-primary" />
+              <span className="text-xs font-semibold text-primary">News Summary</span>
+            </div>
+            <p className="text-sm leading-relaxed text-foreground">{newsSummary}</p>
+          </div>
+        ) : null}
         {newsItems.map((item) => (
           <a
             key={`${symbol.symbol}-${item.title}`}
@@ -335,7 +345,6 @@ function NewsTab({ symbol }: { symbol: SymbolReport }) {
               <p className="text-sm font-medium leading-snug text-foreground">{item.title}</p>
               <SentimentBadge sentiment={item.sentiment} />
             </div>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.summary}</p>
             <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
               <span className="font-semibold text-primary">{item.source}</span>
               <span>{item.date}</span>
@@ -503,7 +512,6 @@ type Sentiment = "positive" | "neutral" | "negative";
 
 type NewsItem = {
   title: string;
-  summary: string;
   source: string;
   date: string;
   url?: string;
@@ -520,11 +528,6 @@ function buildNewsItems(symbol: SymbolReport): NewsItem[] {
 
     return {
       title: article.title,
-      summary:
-        articleRecord.summary ??
-        articleRecord.description ??
-        symbol.newsSummary.summary ??
-        "No article summary was provided by the workflow.",
       source: article.source ?? "Source",
       date: formatArticleDate(article.publishedAt),
       url: article.url,
@@ -543,14 +546,12 @@ function buildNewsItems(symbol: SymbolReport): NewsItem[] {
   const fallbackItems = [
     ...symbol.newsSummary.positiveFactors.map((item) => ({
       title: item,
-      summary: symbol.newsSummary.summary || "Positive factor identified in the news analysis.",
       source: "News analysis",
       date: "Latest",
       sentiment: "positive" as const
     })),
     ...symbol.newsSummary.negativeFactors.map((item) => ({
       title: item,
-      summary: symbol.newsSummary.summary || "Negative factor identified in the news analysis.",
       source: "News analysis",
       date: "Latest",
       sentiment: "negative" as const
@@ -562,7 +563,6 @@ function buildNewsItems(symbol: SymbolReport): NewsItem[] {
     : [
         {
           title: `${symbol.symbol} news context`,
-          summary: symbol.newsSummary.summary || "No news articles were provided by the workflow.",
           source: "News analysis",
           date: "Latest",
           sentiment: "neutral"
