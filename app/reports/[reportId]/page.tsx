@@ -14,6 +14,7 @@ import { AutomateReportCard } from "@/components/automate-report-card";
 import { ReportSymbolCard } from "@/components/report-symbol-card";
 import { TopOpportunitiesCard } from "@/components/top-opportunities-card";
 import { Button } from "@/components/ui/button";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { ANALYSIS_TYPE_LABELS, TIME_HORIZON_LABELS } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import {
@@ -129,6 +130,7 @@ export default async function ReportDetailPage({
                   tone="confidence"
                   icon={<Activity size={12} />}
                   label="Confidence"
+                  tooltip="How reliable the analysis is."
                   value={`${executiveSummary.averageConfidence}/100`}
                 />
               </div>
@@ -158,6 +160,7 @@ export default async function ReportDetailPage({
                     key={item.label}
                     label={item.label}
                     score={item.score}
+                    tooltip={getConfidenceMetricTooltip(item.label)}
                   />
                 ))}
               </div>
@@ -184,11 +187,13 @@ export default async function ReportDetailPage({
 function SummaryTile({
   icon,
   label,
+  tooltip,
   value,
   tone
 }: {
   icon: React.ReactNode;
   label: string;
+  tooltip?: string;
   value: string;
   tone: "opportunity" | "risk" | "confidence";
 }) {
@@ -203,6 +208,7 @@ function SummaryTile({
       <div className="flex items-center gap-1.5 text-xs font-semibold">
         {icon}
         {label}
+        {tooltip ? <InfoTooltip label={tooltip} /> : null}
       </div>
       <p className="text-xs leading-relaxed opacity-90">{value}</p>
     </div>
@@ -231,7 +237,10 @@ function ReportConfidenceMeter({ score }: { score: number }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-muted-foreground">Confidence Score</span>
+        <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          Confidence Score
+          <InfoTooltip label="Average confidence across symbols." />
+        </span>
         <span className="font-mono text-sm font-semibold text-orange-600">{score}/100</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-muted">
@@ -246,14 +255,19 @@ function ReportConfidenceMeter({ score }: { score: number }) {
 
 function ConfidenceRow({
   label,
-  score
+  score,
+  tooltip
 }: {
   label: string;
   score: number;
+  tooltip: string;
 }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="flex-1">{label}</span>
+      <span className="flex flex-1 items-center gap-1.5">
+        {label}
+        <InfoTooltip label={tooltip} />
+      </span>
       <div className="h-1 w-20 overflow-hidden rounded-full bg-muted">
         <div
           className="progress-fill-animated h-full rounded-full bg-blue-500/70"
@@ -263,6 +277,17 @@ function ConfidenceRow({
       <span className="w-8 text-right font-mono">{score}</span>
     </div>
   );
+}
+
+function getConfidenceMetricTooltip(label: string) {
+  const tooltips: Record<string, string> = {
+    "Data Quality": "Completeness of market data.",
+    "News Coverage": "Amount of usable news context.",
+    "Technical Signal Clarity": "Completeness of technical indicators.",
+    "Consensus Agreement": "How closely symbol scores agree."
+  };
+
+  return tooltips[label] ?? "Confidence support metric.";
 }
 
 function formatTimeHorizonDisplay(label: string) {

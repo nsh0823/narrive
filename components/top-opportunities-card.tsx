@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import { Badge } from "@/components/ui/badge";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import type { SymbolReport } from "@/lib/schemas";
 import { getSymbolColor } from "@/lib/symbol-colors";
 import { getSymbolDisplayName } from "@/lib/symbol-metadata";
@@ -38,6 +39,10 @@ export function TopOpportunitiesCard({ symbols }: { symbols: SymbolReport[] }) {
       </div>
 
       <div className="space-y-2">
+        <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-muted-foreground">
+          AI Score
+          <InfoTooltip label="Investment attractiveness score." />
+        </div>
         {symbols.map((symbol, index) => (
           <div key={symbol.symbol} className="flex items-center gap-3">
             <span className="w-5 font-mono text-xs font-semibold text-muted-foreground">
