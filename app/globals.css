@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 215 33% 97%;
+  --foreground: 224 36% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 39% 11%;
+  --primary: 24 95% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 227 100% 97%;
+  --secondary-foreground: 24 95% 37%;
+  --muted: 222 24% 95%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 25 100% 95%;
+  --accent-foreground: 24 95% 37%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 224 22% 90%;
+  --input: 220 17% 88%;
+  --ring: 24 95% 53%;
+  --radius: 0.5rem;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  min-height: 100vh;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 15px;
+}
+
+button,
+input,
+select {
+  letter-spacing: 0;
+}
+
+::selection {
+  background: rgba(249, 115, 22, 0.22);
+}
+
+.animate-pop-in {
+  animation: pop-in 120ms ease-out both;
+}
+
+.animate-scale-in {
+  animation: scale-in 140ms ease-out both;
+}
+
+.animate-slide-in {
+  animation: slide-in 220ms ease-out both;
+}
+
+.progress-fill-animated {
+  position: relative;
+  overflow: hidden;
+  transform-origin: left center;
+  animation: progress-fill-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: width 300ms ease-out;
+}
+
+.progress-fill-animated::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.34) 45%,
+    transparent 80%
+  );
+  transform: translateX(-110%);
+  animation: progress-shimmer 1.7s ease-in-out infinite;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes progress-fill-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes progress-shimmer {
+  0% {
+    transform: translateX(-110%);
+  }
+  55%,
+  100% {
+    transform: translateX(110%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-fill-animated,
+  .progress-fill-animated::after {
+    animation: none;
+    transition: none;
+  }
+}
