@@ -12,7 +12,7 @@ type RecentReport = {
   analysisType: string;
   symbols: string[];
   createdAt: string;
-  topSymbol?: string;
+  averageScore?: number;
   topScore?: number;
 };
 
@@ -76,6 +76,7 @@ function ReportRow({ report }: { report: RecentReport }) {
   const analysisLabel =
     ANALYSIS_TYPE_LABELS[report.analysisType as keyof typeof ANALYSIS_TYPE_LABELS] ??
     report.analysisType;
+  const reportScore = getReportScore(report);
 
   return (
     <Link
@@ -89,14 +90,14 @@ function ReportRow({ report }: { report: RecentReport }) {
         <div className="truncate text-xs text-muted-foreground">{analysisLabel}</div>
         <div className="text-xs text-muted-foreground">{formatCreatedAt(report.createdAt)}</div>
       </div>
-      {typeof report.topScore === "number" ? (
-        <ScoreBadge score={report.topScore} label={report.topSymbol} />
+      {typeof reportScore === "number" ? (
+        <ScoreBadge score={reportScore} />
       ) : null}
     </Link>
   );
 }
 
-function ScoreBadge({ score, label }: { score: number; label?: string }) {
+function ScoreBadge({ score }: { score: number }) {
   const className =
     score >= 75
       ? "border-emerald-500/20 bg-emerald-50 text-emerald-600"
@@ -106,10 +107,13 @@ function ScoreBadge({ score, label }: { score: number; label?: string }) {
 
   return (
     <span className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-xs font-medium ${className}`}>
-      {label ? <span>{label}</span> : null}
       {score}
     </span>
   );
+}
+
+function getReportScore(report: RecentReport) {
+  return report.averageScore ?? report.topScore;
 }
 
 function LoadingRows() {

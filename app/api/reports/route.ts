@@ -39,17 +39,20 @@ export async function GET() {
     reports: reports.map((report) => {
       const parsedReport = reportJsonSchema.safeParse(report.reportJson);
       const symbolReports = parsedReport.success ? parsedReport.data.symbols : [];
-      const topSymbol = [...symbolReports].sort(
-        (a, b) => b.analysis.score - a.analysis.score
-      )[0];
+      const averageScore =
+        symbolReports.length === 0
+          ? undefined
+          : Math.round(
+              symbolReports.reduce((sum, symbolReport) => sum + symbolReport.analysis.score, 0) /
+                symbolReports.length
+            );
 
       return {
         id: report.id,
         analysisType: report.analysisType,
         symbols: report.symbols,
         createdAt: report.createdAt.toISOString(),
-        topSymbol: topSymbol?.symbol,
-        topScore: topSymbol?.analysis.score
+        averageScore
       };
     })
   });
