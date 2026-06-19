@@ -18,6 +18,7 @@ import { ANALYSIS_TYPE_LABELS, TIME_HORIZON_LABELS } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import {
   buildExecutiveSummary,
+  buildReportConfidenceBreakdown,
   sortSymbolsByScore
 } from "@/lib/report-utils";
 import { reportJsonSchema } from "@/lib/schemas";
@@ -48,6 +49,7 @@ export default async function ReportDetailPage({
   const report = parsedReport.data;
   const rankedSymbols = sortSymbolsByScore(report.symbols);
   const executiveSummary = buildExecutiveSummary(report);
+  const confidenceBreakdown = buildReportConfidenceBreakdown(report);
   const generatedDate = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short"
@@ -115,27 +117,19 @@ export default async function ReportDetailPage({
                   tone="opportunity"
                   icon={<TrendingUp size={12} />}
                   label="Opportunity"
-                  value={
-                    executiveSummary.bestOpportunity
-                      ? `${executiveSummary.bestOpportunity.symbol} leads with an AI score of ${executiveSummary.bestOpportunity.analysis.score}.`
-                      : "No opportunity symbol available."
-                  }
+                  value={executiveSummary.opportunityDetail}
                 />
                 <SummaryTile
                   tone="risk"
                   icon={<AlertTriangle size={12} />}
                   label="Risk"
-                  value={
-                    executiveSummary.highestRisk
-                      ? `${executiveSummary.highestRisk.symbol} has the lowest score in this basket.`
-                      : "No risk symbol available."
-                  }
+                  value={executiveSummary.riskDetail}
                 />
                 <SummaryTile
                   tone="confidence"
                   icon={<Activity size={12} />}
                   label="Confidence"
-                  value={`${executiveSummary.averageConfidence}/100 average confidence`}
+                  value={`${executiveSummary.averageConfidence}/100`}
                 />
               </div>
             </section>
@@ -157,23 +151,15 @@ export default async function ReportDetailPage({
 
             <section className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-sm">
               <h3 className="text-sm font-semibold text-foreground">Report Confidence</h3>
-              <ConfidenceMeter score={executiveSummary.averageConfidence} />
+              <ReportConfidenceMeter score={executiveSummary.averageConfidence} />
               <div className="space-y-2 text-xs text-muted-foreground">
-                <ConfidenceRow
-                  label="Processed Symbols"
-                  score={report.metadata.processedSymbolCount ?? report.symbols.length}
-                  max={report.metadata.requestedSymbolCount ?? report.symbols.length}
-                />
-                <ConfidenceRow
-                  label="Average Confidence"
-                  score={executiveSummary.averageConfidence}
-                  max={100}
-                />
-                <ConfidenceRow
-                  label="Failed Symbols"
-                  score={report.metadata.failedSymbols.length}
-                  max={Math.max(report.symbols.length, 1)}
-                />
+                {confidenceBreakdown.map((item) => (
+                  <ConfidenceRow
+                    key={item.label}
+                    label={item.label}
+                    score={item.score}
+                  />
+                ))}
               </div>
             </section>
 
@@ -239,14 +225,14 @@ function SymbolAvatar({ symbol, size }: { symbol: string; size: number }) {
   );
 }
 
-function ConfidenceMeter({ score }: { score: number }) {
-  const color = score >= 75 ? "bg-emerald-500" : score >= 55 ? "bg-amber-500" : "bg-red-500";
+function ReportConfidenceMeter({ score }: { score: number }) {
+  const color = score >= 75 ? "bg-emerald-500" : score >= 55 ? "bg-orange-500" : "bg-red-500";
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-muted-foreground">Average Confidence</span>
-        <span className="font-mono text-sm font-semibold text-foreground">{score}/100</span>
+        <span className="text-xs font-medium text-muted-foreground">Confidence Score</span>
+        <span className="font-mono text-sm font-semibold text-orange-600">{score}/100</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-muted">
         <div
@@ -260,22 +246,18 @@ function ConfidenceMeter({ score }: { score: number }) {
 
 function ConfidenceRow({
   label,
-  score,
-  max
+  score
 }: {
   label: string;
   score: number;
-  max: number;
 }) {
-  const percentage = max === 0 ? 0 : Math.min(100, Math.round((score / max) * 100));
-
   return (
     <div className="flex items-center gap-2">
       <span className="flex-1">{label}</span>
       <div className="h-1 w-20 overflow-hidden rounded-full bg-muted">
         <div
-          className="progress-fill-animated h-full rounded-full bg-primary/70"
-          style={{ width: `${percentage}%` }}
+          className="progress-fill-animated h-full rounded-full bg-blue-500/70"
+          style={{ width: `${score}%` }}
         />
       </div>
       <span className="w-8 text-right font-mono">{score}</span>
