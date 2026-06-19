@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AutomateReportCard } from "@/components/automate-report-card";
 import { ReportSymbolCard } from "@/components/report-symbol-card";
 import { TopOpportunitiesCard } from "@/components/top-opportunities-card";
 import { Button } from "@/components/ui/button";
@@ -175,6 +176,8 @@ export default async function ReportDetailPage({
                 />
               </div>
             </section>
+
+            <AutomateReportCard />
 
             <section className="space-y-3 rounded-xl border border-primary/20 bg-accent p-5">
               <div className="flex items-center gap-2">
